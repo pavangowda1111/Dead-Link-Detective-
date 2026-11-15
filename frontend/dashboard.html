@@ -1,0 +1,2734 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Dashboard | Dead Link Detective</title>
+
+    <link rel="stylesheet" href="./css/dashboard.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* GENERAL SECTIONS */
+
+        .test-section,
+        .analytics-section,
+        .recommendation-section,
+        .reports-section,
+        .intelligence-section {
+            margin-top: 55px;
+        }
+
+        .report-intro {
+            color: #777b89;
+            font-size: 12px;
+            margin-top: 9px;
+            line-height: 1.7;
+        }
+
+        /* TEST SUMMARY */
+
+        .test-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4,minmax(0,1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .test-stat {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            padding: 22px;
+        }
+
+        .test-stat span {
+            display: block;
+            color: #777b89;
+            font: 10px 'DM Mono',monospace;
+        }
+
+        .test-stat strong {
+            display: block;
+            font: 700 38px 'Barlow Condensed',sans-serif;
+            margin-top: 8px;
+        }
+
+        .test-stat.passed strong { color: #168044; }
+        .test-stat.failed strong { color: #dc3545; }
+        .test-stat.warning strong { color: #c27a13; }
+        .test-stat.skipped strong { color: #777b89; }
+
+        .test-progress-card {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            padding: 25px;
+            margin-top: 18px;
+        }
+
+        .test-progress-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            font: 11px 'DM Mono',monospace;
+            color: #777b89;
+        }
+
+        .test-progress-top strong { color: #293de0; }
+
+        .test-progress-track {
+            width: 100%;
+            height: 12px;
+            display: flex;
+            background: #fff;
+            border: 1px solid #e1e3eb;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .test-progress-fill,
+        .test-progress-skipped {
+            display: block;
+            flex: 0 0 auto;
+            height: 100%;
+            width: 0%;
+            transition: width .5s ease;
+        }
+
+        .test-progress-fill {
+            background: linear-gradient(90deg,#293de0,#7185ff);
+        }
+
+        .test-progress-skipped { background: #a9adbb; }
+
+        .test-progress-legend {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            font: 10px 'DM Mono',monospace;
+            color: #777b89;
+        }
+
+        .progress-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .progress-legend-color {
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+        }
+
+        .progress-legend-color.passed { background: #4055ed; }
+        .progress-legend-color.skipped { background: #a9adbb; }
+        .progress-legend-color.other {
+            background: #fff;
+            border: 1px solid #cdd1df;
+        }
+
+        .test-mode-note {
+            margin-top: 12px;
+            color: #777b89;
+            font: 10px 'DM Mono',monospace;
+        }
+
+        /* TEST LIST */
+
+        .test-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 28px 0 18px;
+        }
+
+        .test-toolbar select {
+            padding: 12px 15px;
+            border: 1px solid #dfe1e8;
+            background: white;
+            color: #090b13;
+            font: 11px 'DM Mono',monospace;
+            outline: none;
+            min-width: 190px;
+        }
+
+        .test-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .test-item {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            overflow: hidden;
+        }
+
+        .test-item-header {
+            width: 100%;
+            padding: 18px 20px;
+            display: grid;
+            grid-template-columns: 55px minmax(0,1fr) auto 25px;
+            gap: 15px;
+            align-items: center;
+            background: #fff;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .test-item-header:hover { background: #fafaff; }
+
+        .test-id {
+            color: #293de0;
+            font: 11px 'DM Mono',monospace;
+        }
+
+        .test-name {
+            color: #090b13;
+            font: 600 15px 'Space Grotesk',sans-serif;
+        }
+
+        .test-category {
+            color: #777b89;
+            font: 10px 'DM Mono',monospace;
+            margin-top: 5px;
+        }
+
+        .test-message {
+            color: #777b89;
+            font: 11px 'Space Grotesk',sans-serif;
+            margin-top: 7px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .test-status {
+            font: 10px 'DM Mono',monospace;
+            padding: 8px 11px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .test-status.passed {
+            background: #eaf7ef;
+            color: #168044;
+        }
+
+        .test-status.failed {
+            background: #fff0f0;
+            color: #dc3545;
+        }
+
+        .test-status.warning {
+            background: #fff6e8;
+            color: #b66b00;
+        }
+
+        .test-status.skipped {
+            background: #f0f1f5;
+            color: #777b89;
+        }
+
+        .test-arrow {
+            color: #293de0;
+            font-size: 18px;
+            transition: transform .2s;
+        }
+
+        .test-item.open .test-arrow { transform: rotate(180deg); }
+
+        .test-explanation {
+            display: none;
+            border-top: 1px solid #e7e8ef;
+            padding: 23px;
+            background: #fafbff;
+        }
+
+        .test-item.open .test-explanation { display: block; }
+
+        .explanation-heading {
+            font: 700 16px 'Space Grotesk',sans-serif;
+            color: #090b13;
+            margin-bottom: 17px;
+        }
+
+        .explanation-grid {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 13px;
+        }
+
+        .explanation-box {
+            background: #fff;
+            border: 1px solid #e1e3eb;
+            padding: 15px;
+            min-width: 0;
+        }
+
+        .explanation-box h4 {
+            color: #293de0;
+            font: 11px 'DM Mono',monospace;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .explanation-box p {
+            color: #646979;
+            font: 12px 'Space Grotesk',sans-serif;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        .explanation-box.full { grid-column: 1/-1; }
+
+        .test-empty {
+            background: #fff;
+            border: 1px dashed #cdd1df;
+            padding: 35px 25px;
+            color: #777b89;
+            font: 12px 'Space Grotesk',sans-serif;
+            line-height: 1.8;
+        }
+
+        .test-empty strong {
+            display: block;
+            color: #090b13;
+            margin-bottom: 7px;
+            font-size: 15px;
+        }
+
+        /* ANALYTICS */
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 18px;
+            margin-top: 25px;
+        }
+
+        .chart-card {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            padding: 23px;
+            min-width: 0;
+        }
+
+        .chart-card.wide { grid-column: 1/-1; }
+
+        .chart-heading { margin-bottom: 8px; }
+
+        .chart-heading h3 {
+            font: 700 20px 'Barlow Condensed',sans-serif;
+            color: #090b13;
+        }
+
+        .chart-heading p {
+            font: 11px 'Space Grotesk',sans-serif;
+            color: #777b89;
+            line-height: 1.7;
+            margin-top: 5px;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 290px;
+            margin-top: 15px;
+        }
+
+        .chart-card.wide .chart-container { height: 310px; }
+
+        .chart-note {
+            color: #777b89;
+            font: 10px 'DM Mono',monospace;
+            margin-top: 12px;
+            line-height: 1.7;
+        }
+
+        .no-chart-data {
+            color: #777b89;
+            font: 12px 'Space Grotesk',sans-serif;
+            padding: 35px 10px;
+            text-align: center;
+        }
+
+        /* RECOMMENDATIONS */
+
+        .recommendation-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 23px;
+        }
+
+        .recommendation-card {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            padding: 21px;
+        }
+
+        .recommendation-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .recommendation-top h3 {
+            font: 600 15px 'Space Grotesk',sans-serif;
+            color: #090b13;
+        }
+
+        .recommendation-label {
+            font: 10px 'DM Mono',monospace;
+            padding: 7px 10px;
+            background: #fff6e8;
+            color: #b66b00;
+        }
+
+        .recommendation-label.failed {
+            background: #fff0f0;
+            color: #dc3545;
+        }
+
+        .recommendation-card p {
+            font: 12px 'Space Grotesk',sans-serif;
+            color: #777b89;
+            line-height: 1.8;
+            margin-top: 12px;
+        }
+
+        .recommendation-card strong { color: #252a38; }
+
+        .recommendation-empty {
+            padding: 25px;
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            color: #168044;
+            font: 12px 'Space Grotesk',sans-serif;
+            line-height: 1.8;
+        }
+
+        /* WEBSITE HEALTH SCORE */
+
+        .health-score-card {
+            margin-top: 25px;
+            padding: 28px;
+            background: #101525;
+            color: #fff;
+            display: grid;
+            grid-template-columns: 180px minmax(0,1fr);
+            align-items: center;
+            gap: 30px;
+        }
+
+        .health-score-number {
+            width: 145px;
+            height: 145px;
+            border: 8px solid #293de0;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+        }
+
+        .health-score-number strong {
+            font: 700 48px 'Barlow Condensed',sans-serif;
+        }
+
+        .health-score-number span {
+            color: #aeb4c7;
+            font: 10px 'DM Mono',monospace;
+        }
+
+        .health-score-info h3 {
+            font: 700 25px 'Barlow Condensed',sans-serif;
+            margin-bottom: 8px;
+        }
+
+        .health-score-info p {
+            color: #aeb4c7;
+            font: 12px 'Space Grotesk',sans-serif;
+            line-height: 1.8;
+        }
+
+        .health-score-label {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: rgba(41,61,224,.2);
+            color: #9eacff;
+            font: 10px 'DM Mono',monospace;
+        }
+
+        /* PROS AND CONS */
+
+        .intelligence-grid {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .intelligence-card {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            padding: 23px;
+            min-width: 0;
+        }
+
+        .intelligence-card h3 {
+            font: 700 20px 'Barlow Condensed',sans-serif;
+            color: #090b13;
+            margin-bottom: 15px;
+        }
+
+        .intelligence-card.pros h3 { color: #168044; }
+        .intelligence-card.cons h3 { color: #dc3545; }
+
+        .intelligence-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .intelligence-item {
+            padding: 12px 14px;
+            background: #f7f8fc;
+            border-left: 3px solid #168044;
+            color: #454b5b;
+            font: 12px 'Space Grotesk',sans-serif;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .intelligence-card.cons .intelligence-item {
+            border-left-color: #dc3545;
+        }
+
+        .intelligence-empty {
+            color: #777b89;
+            font: 12px 'Space Grotesk',sans-serif;
+            line-height: 1.8;
+        }
+
+        .priority-label {
+            padding: 6px 9px;
+            font: 9px 'DM Mono',monospace;
+            background: #f0f1f5;
+            color: #555b6b;
+        }
+
+        .priority-label.high {
+            background: #fff0f0;
+            color: #dc3545;
+        }
+
+        .priority-label.medium {
+            background: #fff6e8;
+            color: #b66b00;
+        }
+
+        .priority-label.low {
+            background: #eaf7ef;
+            color: #168044;
+        }
+
+        /* LINK CRAWLER */
+
+        .link-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4,minmax(0,1fr));
+            gap: 13px;
+            margin-top: 22px;
+        }
+
+        .link-stat {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            padding: 18px;
+        }
+
+        .link-stat span {
+            display: block;
+            color: #777b89;
+            font: 9px 'DM Mono',monospace;
+        }
+
+        .link-stat strong {
+            display: block;
+            margin-top: 8px;
+            color: #090b13;
+            font: 700 30px 'Barlow Condensed',sans-serif;
+        }
+
+        .link-table-wrapper {
+            margin-top: 20px;
+            overflow-x: auto;
+            background: #fff;
+            border: 1px solid #dfe1e8;
+        }
+
+        .link-table-wrapper table {
+            width: 100%;
+            min-width: 750px;
+            border-collapse: collapse;
+        }
+
+        .link-table-wrapper th,
+        .link-table-wrapper td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e7e8ef;
+            font: 10px 'DM Mono',monospace;
+            overflow-wrap: anywhere;
+        }
+
+        .link-table-wrapper th {
+            background: #f7f8fc;
+            color: #777b89;
+        }
+
+        .link-table-wrapper td { color: #454b5b; }
+
+        .link-empty {
+            padding: 25px;
+            color: #777b89;
+            font: 12px 'Space Grotesk',sans-serif;
+            line-height: 1.8;
+        }
+
+        /* REPORTS */
+
+        .report-files {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .file-card {
+            background: #fff;
+            border: 1px solid #dfe1e8;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 18px;
+            min-width: 0;
+            transition: .25s;
+        }
+
+        .file-card:hover {
+            border-color: #293de0;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(41,61,224,.08);
+        }
+
+        .file-card-top {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-icon {
+            width: 54px;
+            height: 54px;
+            display: grid;
+            place-items: center;
+            background: #e9ecff;
+            color: #293de0;
+            font: 700 13px 'DM Mono',monospace;
+        }
+
+        .file-icon.txt {
+            background: #eaf7ef;
+            color: #168044;
+        }
+
+        .optional-tag {
+            font: 9px 'DM Mono',monospace;
+            color: #777b89;
+            background: #f4f5f8;
+            padding: 7px 10px;
+        }
+
+        .file-info h3 {
+            font: 700 25px 'Barlow Condensed',sans-serif;
+            color: #090b13;
+        }
+
+        .file-info p {
+            font: 11px 'Space Grotesk',sans-serif;
+            color: #777b89;
+            margin-top: 7px;
+            line-height: 1.7;
+        }
+
+        .report-download-btn {
+            width: 100%;
+            min-height: 46px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #293de0;
+            background: #293de0;
+            color: #fff;
+            font: 500 10px 'DM Mono',monospace;
+            cursor: pointer;
+            transition: .25s;
+        }
+
+        .report-download-btn:hover { background: #1b2bb8; }
+
+        .report-download-btn.txt-btn {
+            background: #fff;
+            color: #168044;
+            border-color: #168044;
+        }
+
+        .report-download-btn.txt-btn:hover {
+            background: #168044;
+            color: #fff;
+        }
+
+        .report-download-btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .report-choice-footer {
+            margin-top: 22px;
+            padding: 22px 25px;
+            background: #101525;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .skip-information {
+            color: #aeb4c7;
+            font: 11px 'Space Grotesk',sans-serif;
+            line-height: 1.7;
+        }
+
+        .skip-information strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .skip-report-btn {
+            padding: 12px 19px;
+            background: transparent;
+            border: 1px solid #68718c;
+            color: #fff;
+            font: 10px 'DM Mono',monospace;
+            cursor: pointer;
+        }
+
+        .report-note {
+            margin-top: 13px;
+            color: #777b89;
+            font: 10px 'DM Mono',monospace;
+            line-height: 1.6;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width:800px) {
+            .test-summary-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+            .analytics-grid { grid-template-columns: 1fr; }
+            .chart-card.wide { grid-column: auto; }
+            .health-score-card { grid-template-columns: 1fr; text-align: center; }
+            .intelligence-grid { grid-template-columns: 1fr; }
+            .link-summary-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+        }
+
+        @media(max-width:650px) {
+            .report-files { grid-template-columns: 1fr; }
+
+            .test-item-header {
+                grid-template-columns: 35px minmax(0,1fr) auto;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .test-arrow { display: none; }
+            .explanation-grid { grid-template-columns: 1fr; }
+            .explanation-box.full { grid-column: auto; }
+
+            .test-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .test-toolbar select { width: 100%; }
+
+            .report-choice-footer {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .skip-report-btn { width: 100%; }
+            .chart-container { height: 250px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="dashboard-navbar">
+    <a href="./index.html" class="logo">
+        <span>◈</span> DEADLINK<span class="blue">.</span>
+    </a>
+
+    <div class="nav-actions">
+        <span class="system-status"><i></i> SCANNER ONLINE</span>
+        <a href="./index.html" class="back-button">← NEW SCAN</a>
+    </div>
+</header>
+
+<main class="dashboard-main">
+
+    <!-- HEADER -->
+
+    <section class="dashboard-heading">
+        <div>
+            <span class="eyebrow">/ WEBSITE INTELLIGENCE / SCAN RESULTS</span>
+            <h1>SCAN <span>DASHBOARD.</span></h1>
+            <p>Website investigation results and performance overview.</p>
+        </div>
+        <div class="scan-complete"><span></span> SCAN COMPLETED</div>
+    </section>
+
+    <!-- TARGET -->
+
+    <section class="target-card">
+        <div class="target-top">
+            <span>TARGET WEBSITE</span>
+            <span id="scanMode">NORMAL SCAN</span>
+        </div>
+
+        <h2 id="targetWebsite">Loading website...</h2>
+        <p id="scanDate">Scan date: --</p>
+
+        <div class="target-meta">
+            <div>
+                <span>SCAN ID</span>
+                <strong id="scanId">--</strong>
+            </div>
+            <div>
+                <span>FINAL DESTINATION</span>
+                <strong id="finalURL">--</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN METRICS -->
+
+    <section class="metrics-grid">
+        <article class="metric-card">
+            <span class="metric-label">TOTAL URLS</span>
+            <strong id="totalURLs">0</strong>
+            <small>URLs investigated</small>
+        </article>
+
+        <article class="metric-card working">
+            <span class="metric-label">WORKING</span>
+            <strong id="workingURLs">0</strong>
+            <small>Successful responses</small>
+        </article>
+
+        <article class="metric-card broken">
+            <span class="metric-label">BROKEN</span>
+            <strong id="brokenURLs">0</strong>
+            <small>Unsuccessful responses</small>
+        </article>
+
+        <article class="metric-card unreachable">
+            <span class="metric-label">UNREACHABLE</span>
+            <strong id="unreachableURLs">0</strong>
+            <small>Connection failures</small>
+        </article>
+    </section>
+
+    <!-- PERFORMANCE AND HTTP -->
+
+    <section class="details-grid">
+        <article class="detail-card">
+            <div class="card-heading">
+                <div>
+                    <span class="eyebrow">/ RESPONSE ANALYSIS</span>
+                    <h2>PERFORMANCE</h2>
+                </div>
+                <span class="card-icon">◷</span>
+            </div>
+
+            <div class="performance-value">
+                <strong id="responseTime">--</strong>
+                <span>milliseconds</span>
+            </div>
+
+            <div class="performance-line">
+                <div id="performanceBar"></div>
+            </div>
+
+            <p id="speedStatus">Waiting for response information.</p>
+        </article>
+
+        <article class="detail-card">
+            <div class="card-heading">
+                <div>
+                    <span class="eyebrow">/ HTTP INFORMATION</span>
+                    <h2>CONNECTION STATUS</h2>
+                </div>
+                <span class="card-icon">◇</span>
+            </div>
+
+            <div class="http-status">
+                <strong id="httpStatus">--</strong>
+                <span id="httpStatusText">Waiting for status</span>
+            </div>
+
+            <div class="info-row">
+                <span>Redirected</span>
+                <strong id="redirectStatus">--</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Response time</span>
+                <strong id="detailResponseTime">--</strong>
+            </div>
+        </article>
+    </section>
+
+    <!-- WEBSITE HEALTH SCORE -->
+
+    <section class="intelligence-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ OVERALL EVALUATION / WEBSITE CONDITION</span>
+                <h2>WEBSITE HEALTH SCORE.</h2>
+                <p class="report-intro">
+                    A calculated score based on completed scanner checks.
+                    This is an indicator, not a security certification.
+                </p>
+            </div>
+        </div>
+
+        <div class="health-score-card">
+            <div class="health-score-number">
+                <strong id="websiteScore">--</strong>
+                <span>OUT OF 100</span>
+            </div>
+
+            <div class="health-score-info">
+                <h3 id="websiteScoreLabel">AWAITING SCORE</h3>
+                <p id="websiteScoreDescription">
+                    Website health information will appear after the scan is loaded.
+                </p>
+                <span class="health-score-label" id="scoreBasis">
+                    CALCULATED FROM SCAN RESULTS
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- WEBSITE PROS AND CONS -->
+
+    <section class="intelligence-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ FINDINGS / TECHNICAL OBSERVATIONS</span>
+                <h2>WEBSITE STRENGTHS & ISSUES.</h2>
+                <p class="report-intro">
+                    Positive findings and detected concerns returned by the scanner.
+                </p>
+            </div>
+        </div>
+
+        <div class="intelligence-grid">
+            <article class="intelligence-card pros">
+                <h3>✓ WEBSITE STRENGTHS</h3>
+                <div class="intelligence-list" id="prosList">
+                    <p class="intelligence-empty">Loading positive findings...</p>
+                </div>
+            </article>
+
+            <article class="intelligence-card cons">
+                <h3>! DETECTED ISSUES</h3>
+                <div class="intelligence-list" id="consList">
+                    <p class="intelligence-empty">Loading detected issues...</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- PRIORITIZED RECOMMENDATIONS -->
+
+    <section class="intelligence-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ IMPROVEMENT PLAN / PRIORITY ANALYSIS</span>
+                <h2>PRIORITIZED ACTION PLAN.</h2>
+                <p class="report-intro">
+                    Recommended actions based on the scanner's findings and priority levels.
+                </p>
+            </div>
+        </div>
+
+        <div class="recommendation-list" id="priorityRecommendationList">
+            <div class="recommendation-empty">
+                Waiting for recommendation data...
+            </div>
+        </div>
+    </section>
+
+    <!-- DEAD LINK INVESTIGATION -->
+
+    <section class="intelligence-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ LINK CRAWLER / NAVIGATION INVESTIGATION</span>
+                <h2>DEAD LINK INVESTIGATION.</h2>
+                <p class="report-intro">
+                    Link checks performed on the scanned page. Only links actually
+                    checked by the crawler are included in the detailed results.
+                </p>
+            </div>
+
+            <span class="results-count" id="linkScanCount">0 LINKS</span>
+        </div>
+
+        <div class="link-summary-grid">
+            <article class="link-stat">
+                <span>LINKS FOUND</span>
+                <strong id="linksFound">0</strong>
+            </article>
+
+            <article class="link-stat">
+                <span>LINKS CHECKED</span>
+                <strong id="linksChecked">0</strong>
+            </article>
+
+            <article class="link-stat">
+                <span>WORKING</span>
+                <strong id="linksWorking">0</strong>
+            </article>
+
+            <article class="link-stat">
+                <span>BROKEN</span>
+                <strong id="linksBroken">0</strong>
+            </article>
+
+            <article class="link-stat">
+                <span>INTERNAL LINKS</span>
+                <strong id="internalLinks">0</strong>
+            </article>
+
+            <article class="link-stat">
+                <span>EXTERNAL LINKS</span>
+                <strong id="externalLinks">0</strong>
+            </article>
+
+            <article class="link-stat">
+                <span>REDIRECTED</span>
+                <strong id="linksRedirected">0</strong>
+            </article>
+
+            <article class="link-stat">
+                <span>SKIPPED / UNREACHABLE</span>
+                <strong id="linksSkipped">0</strong>
+            </article>
+        </div>
+
+        <div class="link-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>LINK URL</th>
+                        <th>TYPE</th>
+                        <th>STATUS</th>
+                        <th>HTTP CODE</th>
+                        <th>FINAL URL</th>
+                    </tr>
+                </thead>
+
+                <tbody id="linkResultsTable">
+                    <tr>
+                        <td colspan="5" class="link-empty">
+                            Waiting for link-crawler results...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- INDIVIDUAL TEST RESULTS -->
+
+    <section class="test-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ SCANNER INVESTIGATION / TEST BREAKDOWN</span>
+                <h2>SECURITY & WEBSITE TESTS.</h2>
+            </div>
+
+            <span class="results-count" id="testCount">0 TESTS</span>
+        </div>
+
+        <div class="test-summary-grid">
+            <article class="test-stat">
+                <span>TOTAL TESTS</span>
+                <strong id="totalTests">0</strong>
+            </article>
+
+            <article class="test-stat passed">
+                <span>PASSED</span>
+                <strong id="passedTests">0</strong>
+            </article>
+
+            <article class="test-stat failed">
+                <span>FAILED</span>
+                <strong id="failedTests">0</strong>
+            </article>
+
+            <article class="test-stat warning">
+                <span>WARNINGS</span>
+                <strong id="warningTests">0</strong>
+            </article>
+        </div>
+
+        <div class="test-progress-card">
+            <div class="test-progress-top">
+                <span>TEST EXECUTION PROGRESS</span>
+                <strong id="testPercentage">0% PASSED</strong>
+            </div>
+
+            <div class="test-progress-track">
+                <div class="test-progress-fill" id="testProgress"></div>
+                <div class="test-progress-skipped" id="skippedProgress"></div>
+            </div>
+
+            <div class="test-progress-legend">
+                <div class="progress-legend-item">
+                    <span class="progress-legend-color passed"></span>
+                    <span>Passed</span>
+                </div>
+
+                <div class="progress-legend-item">
+                    <span class="progress-legend-color skipped"></span>
+                    <span>Skipped</span>
+                </div>
+
+                <div class="progress-legend-item">
+                    <span class="progress-legend-color other"></span>
+                    <span>Failed / Warning / Other</span>
+                </div>
+            </div>
+
+            <p class="test-mode-note" id="testProgressText">
+                Waiting for test results...
+            </p>
+        </div>
+
+        <div class="test-toolbar">
+            <div>
+                <span class="eyebrow">/ INDIVIDUAL TEST DETAILS</span>
+                <h2>WHAT WAS TESTED?</h2>
+                <p class="report-intro">
+                    Select any test to understand its purpose and recommendations.
+                </p>
+            </div>
+
+            <select id="testFilter">
+                <option value="all">ALL TEST RESULTS</option>
+                <option value="Passed">PASSED</option>
+                <option value="Failed">FAILED</option>
+                <option value="Warning">WARNINGS</option>
+                <option value="Skipped">SKIPPED</option>
+            </select>
+        </div>
+
+        <div class="test-list" id="testList">
+            <div class="test-empty">
+                <strong>Loading individual tests...</strong>
+                Your test results will appear here.
+            </div>
+        </div>
+    </section>
+
+    <!-- ANALYTICS -->
+
+    <section class="analytics-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ WEBSITE ANALYTICS / VISUAL INVESTIGATION</span>
+                <h2>WEBSITE HEALTH ANALYSIS.</h2>
+            </div>
+            <span class="results-count">SCAN STATISTICS</span>
+        </div>
+
+        <div class="analytics-grid">
+            <article class="chart-card wide">
+                <div class="chart-heading">
+                    <h3>RESPONSE TIME ANALYSIS</h3>
+                    <p>Actual response time measurements collected during this scan.</p>
+                </div>
+
+                <div class="chart-container" id="lineChartContainer">
+                    <canvas id="responseChart"></canvas>
+                </div>
+
+                <p class="chart-note" id="responseChartNote">
+                    Response time is measured in milliseconds.
+                </p>
+            </article>
+
+            <article class="chart-card">
+                <div class="chart-heading">
+                    <h3>TEST RESULT DISTRIBUTION</h3>
+                    <p>Proportion of passed, failed, warning and skipped tests.</p>
+                </div>
+
+                <div class="chart-container" id="pieChartContainer">
+                    <canvas id="testPieChart"></canvas>
+                </div>
+            </article>
+
+            <article class="chart-card">
+                <div class="chart-heading">
+                    <h3>ISSUES BY CATEGORY</h3>
+                    <p>Number of failed and warning checks grouped by category.</p>
+                </div>
+
+                <div class="chart-container" id="barChartContainer">
+                    <canvas id="issueBarChart"></canvas>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- EXISTING RECOMMENDATIONS -->
+
+    <section class="recommendation-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ ACTION PLAN / WEBSITE IMPROVEMENT</span>
+                <h2>WHAT SHOULD BE IMPROVED?</h2>
+                <p class="report-intro">
+                    Recommendations based on failed and warning checks.
+                </p>
+            </div>
+        </div>
+
+        <div class="recommendation-list" id="recommendationList">
+            <div class="recommendation-empty">
+                Recommendations will appear after the scan results are loaded.
+            </div>
+        </div>
+    </section>
+
+    <!-- URL RESULTS -->
+
+    <section class="results-section">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ DETAILED INVESTIGATION</span>
+                <h2>URL SCAN RESULTS.</h2>
+            </div>
+
+            <span class="results-count" id="resultsCount">0 RESULTS</span>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>WEBSITE URL</th>
+                        <th>STATUS CODE</th>
+                        <th>RESPONSE TIME</th>
+                        <th>REDIRECT</th>
+                        <th>RESULT</th>
+                    </tr>
+                </thead>
+
+                <tbody id="resultsTable">
+                    <tr>
+                        <td colspan="5" class="empty-state">Loading scan results...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- REPORT DOWNLOAD -->
+
+    <section class="reports-section" id="reportChoice">
+        <div class="section-title">
+            <div>
+                <span class="eyebrow">/ SCAN EXPORT / USER PREFERENCE</span>
+                <h2>YOUR REPORTS.</h2>
+                <p class="report-intro">
+                    Choose your preferred report format or skip this step.
+                </p>
+            </div>
+
+            <span class="results-count">OPTIONAL DOWNLOAD</span>
+        </div>
+
+        <div class="report-files">
+            <article class="file-card">
+                <div class="file-card-top">
+                    <div class="file-icon">JSON</div>
+                    <span class="optional-tag">OPTIONAL</span>
+                </div>
+
+                <div class="file-info">
+                    <h3>TECHNICAL REPORT</h3>
+                    <p>Download structured scan data, individual tests and technical findings.</p>
+                </div>
+
+                <button type="button" class="report-download-btn" id="jsonDownload">
+                    ↓ DOWNLOAD JSON REPORT
+                </button>
+            </article>
+
+            <article class="file-card">
+                <div class="file-card-top">
+                    <div class="file-icon txt">TXT</div>
+                    <span class="optional-tag">OPTIONAL</span>
+                </div>
+
+                <div class="file-info">
+                    <h3>READABLE REPORT</h3>
+                    <p>Download a readable summary of tests, results and detected issues.</p>
+                </div>
+
+                <button type="button" class="report-download-btn txt-btn" id="txtDownload">
+                    ↓ DOWNLOAD TEXT REPORT
+                </button>
+            </article>
+        </div>
+
+        <div class="report-choice-footer">
+            <div class="skip-information">
+                <strong>Don't need a report right now?</strong>
+                Your scan results remain available on this dashboard.
+            </div>
+
+            <button type="button" class="skip-report-btn" id="skipReport">
+                SKIP DOWNLOAD →
+            </button>
+        </div>
+
+        <p class="report-note" id="reportMessage" aria-live="polite">
+            No report will be downloaded without your permission.
+        </p>
+    </section>
+
+    <!-- FOOTER -->
+
+    <section class="dashboard-footer">
+        <div><span class="footer-symbol">◈</span> DEAD LINK DETECTIVE</div>
+        <p>WEBSITE INTELLIGENCE / VERSION 1.0</p>
+        <a href="./index.html">START ANOTHER SCAN ↗</a>
+    </section>
+
+</main>
+
+<script>
+const API = "http://localhost:5000/api";
+
+let activeScanId = null;
+let allTests = [];
+let responseChart = null;
+let pieChart = null;
+let barChart = null;
+
+const resultsTable = document.getElementById("resultsTable");
+const testList = document.getElementById("testList");
+
+/* TEST EXPLANATIONS */
+
+const explanations = {
+    "Website Reachability": {
+        category: "Website Availability",
+        what: "Checks whether the website can be contacted and returns a response.",
+        why: "Visitors must be able to reach the website before they can use its services.",
+        caution: "If this fails, visitors may be unable to open the website.",
+        fix: "Check the hosting server, DNS configuration, network connection and server availability.",
+        benefit: "Visitors should be able to access the website more reliably."
+    },
+    "HTTP Response Status": {
+        category: "Website Availability",
+        what: "Checks the HTTP status code returned by the website.",
+        why: "Status codes identify successful requests, redirects and errors.",
+        caution: "A 4xx or 5xx response can indicate a missing page or server problem.",
+        fix: "Investigate the returned status code, repair missing routes and resolve server errors.",
+        benefit: "Users and search engines can reach the intended pages more reliably."
+    },
+    "HTTPS Encryption": {
+        category: "Security",
+        what: "Checks whether the website uses HTTPS.",
+        why: "HTTPS encrypts information transferred between visitors and the website.",
+        caution: "Without HTTPS, information may be exposed to interception.",
+        fix: "Install a valid TLS certificate and redirect HTTP traffic to HTTPS.",
+        benefit: "Connections receive transport encryption."
+    },
+    "Page Response Time": {
+        category: "Performance",
+        what: "Measures how long the website takes to respond.",
+        why: "Slow responses can make a website feel unresponsive.",
+        caution: "High response time may indicate server load or network delay.",
+        fix: "Review server performance, database queries, caching and hosting resources.",
+        benefit: "A faster server response can improve the visitor experience."
+    },
+    "HTML Content Type": {
+        category: "Compatibility",
+        what: "Checks whether the server identifies the returned content as HTML.",
+        why: "Browsers use content types to understand how to handle a response.",
+        caution: "An incorrect content type can cause unexpected handling.",
+        fix: "Configure the server to return the correct Content-Type header.",
+        benefit: "Browsers can interpret content more consistently."
+    },
+    "Page Title": {
+        category: "SEO & Content",
+        what: "Checks whether the page contains a title element.",
+        why: "The title helps visitors and search engines understand the page.",
+        caution: "A missing or unclear title can make pages harder to identify.",
+        fix: "Add a unique, descriptive title to each important page.",
+        benefit: "Pages become easier to identify."
+    },
+    "Meta Description": {
+        category: "SEO & Content",
+        what: "Checks whether a page provides a meta description.",
+        why: "Search engines may use it when presenting search results.",
+        caution: "Without one, search engines may choose other page text.",
+        fix: "Write a relevant, concise description for each important page.",
+        benefit: "Search-result snippets may communicate page content more clearly."
+    },
+    "Mobile Viewport": {
+        category: "Mobile Compatibility",
+        what: "Checks for the viewport meta tag.",
+        why: "It helps browsers display a page at an appropriate width on mobile devices.",
+        caution: "Without it, pages may appear zoomed out on phones.",
+        fix: "Add a responsive viewport meta tag and test mobile layouts.",
+        benefit: "The website can display more appropriately on mobile devices."
+    },
+    "Main Heading (H1)": {
+        category: "SEO & Content",
+        what: "Checks whether the page contains an H1 heading.",
+        why: "A main heading communicates the primary topic.",
+        caution: "A missing heading can make the page structure less clear.",
+        fix: "Add a descriptive main heading.",
+        benefit: "The content hierarchy becomes easier to understand."
+    },
+    "Canonical URL": {
+        category: "SEO & Content",
+        what: "Checks whether the page declares a canonical URL.",
+        why: "A canonical link can indicate the preferred URL.",
+        caution: "Incorrect canonical URLs may confuse search engines.",
+        fix: "Set the canonical URL to the correct preferred page.",
+        benefit: "Search engines receive clearer URL signals."
+    },
+    "Robots Meta Tag": {
+        category: "SEO & Content",
+        what: "Checks whether the page includes a robots meta tag.",
+        why: "This tag can provide indexing and link-following instructions.",
+        caution: "A restrictive directive may prevent indexing.",
+        fix: "Use indexing directives that match the website owner's intention.",
+        benefit: "Search engines receive clearer instructions."
+    },
+    "Favicon Reference": {
+        category: "Website Identity",
+        what: "Checks whether the page references a favicon.",
+        why: "A favicon is the small icon displayed in browser tabs.",
+        caution: "A missing favicon can make the site less recognizable.",
+        fix: "Add a valid favicon file and reference it in the page head.",
+        benefit: "The website can be more recognizable."
+    },
+    "SSL Certificate": {
+        category: "Security",
+        what: "Checks whether the HTTPS certificate can be validated.",
+        why: "Certificates help browsers verify website identity.",
+        caution: "An invalid or expired certificate can trigger browser warnings.",
+        fix: "Install or renew a trusted certificate.",
+        benefit: "Visitors receive a more trustworthy encrypted connection."
+    },
+    "TLS Protocol": {
+        category: "Security",
+        what: "Checks which TLS protocol is negotiated.",
+        why: "TLS protects information transferred between browser and server.",
+        caution: "Outdated protocols may provide weaker protection.",
+        fix: "Configure modern TLS versions, preferably TLS 1.2 or TLS 1.3.",
+        benefit: "The connection can use modern transport security."
+    },
+    "HSTS Header": {
+        category: "Security",
+        what: "Checks for the Strict-Transport-Security header.",
+        why: "HSTS tells supported browsers to use HTTPS for future connections.",
+        caution: "Without HSTS, some visitors may initially attempt HTTP.",
+        fix: "Configure an appropriate HSTS policy after confirming HTTPS works.",
+        benefit: "Supported browsers are instructed to prefer HTTPS."
+    },
+    "Content Security Policy": {
+        category: "Security",
+        what: "Checks for a Content-Security-Policy header.",
+        why: "CSP can restrict which resources a browser is allowed to load.",
+        caution: "Without a suitable policy, some content-injection protections are unavailable.",
+        fix: "Create and test a CSP for required resources.",
+        benefit: "A suitable policy can reduce certain injection risks."
+    },
+    "Content Type Protection": {
+        category: "Security",
+        what: "Checks for the X-Content-Type-Options header.",
+        why: "The nosniff value tells browsers not to guess certain content types.",
+        caution: "Without it, some browsers may interpret resources unexpectedly.",
+        fix: "Set X-Content-Type-Options to nosniff.",
+        benefit: "Browsers are instructed to respect declared content types."
+    },
+    "Clickjacking Protection": {
+        category: "Security",
+        what: "Checks for the X-Frame-Options header.",
+        why: "This header can restrict framing by other websites.",
+        caution: "Missing framing controls can increase certain clickjacking risks.",
+        fix: "Configure X-Frame-Options or a suitable frame-ancestors CSP directive.",
+        benefit: "The website gains an additional framing control."
+    },
+    "Referrer Policy": {
+        category: "Privacy & Security",
+        what: "Checks the Referrer-Policy response header.",
+        why: "It controls how much referring-page information browsers send.",
+        caution: "An overly permissive policy may disclose unnecessary URL information.",
+        fix: "Set a suitable Referrer-Policy.",
+        benefit: "The website can limit unnecessary referrer sharing."
+    },
+    "Permissions Policy": {
+        category: "Privacy & Security",
+        what: "Checks for a Permissions-Policy header.",
+        why: "It can control access to browser features.",
+        caution: "Without a policy, there are fewer explicit restrictions.",
+        fix: "Define which browser features the website actually needs.",
+        benefit: "Unnecessary browser-feature access can be limited."
+    },
+    "DNS Resolution": {
+        category: "Network",
+        what: "Checks whether the hostname can be resolved to an IP address.",
+        why: "DNS helps browsers find the server associated with a domain.",
+        caution: "DNS failures can prevent visitors reaching the website.",
+        fix: "Check domain records, nameservers and DNS hosting.",
+        benefit: "Domain names can resolve more reliably."
+    },
+    "Mixed Content": {
+        category: "Security",
+        what: "Checks whether an HTTPS page references resources using HTTP.",
+        why: "Secure pages should load resources through secure connections.",
+        caution: "Insecure resources can weaken an HTTPS page.",
+        fix: "Replace HTTP resource references with valid HTTPS URLs.",
+        benefit: "The page can load resources through secure connections."
+    },
+    "Form Submission Security": {
+        category: "Security",
+        what: "Checks whether detected forms submit to HTTP action URLs.",
+        why: "Forms may carry personal information.",
+        caution: "Submitting sensitive information over HTTP can expose it.",
+        fix: "Use HTTPS form destinations and validate server-side handling.",
+        benefit: "Form submissions can be protected during transmission."
+    },
+    "Image Accessibility": {
+        category: "Accessibility",
+        what: "Checks whether detected images have alt attributes.",
+        why: "Alternative text can describe meaningful images to screen-reader users.",
+        caution: "Missing alternative text can make images less accessible.",
+        fix: "Add useful alt text to meaningful images and empty alt text to decorative images.",
+        benefit: "Assistive technologies can better understand image content."
+    },
+    "HTML Language Attribute": {
+        category: "Accessibility",
+        what: "Checks whether the HTML element declares a language.",
+        why: "Assistive technologies use language information to interpret text.",
+        caution: "Without a language declaration, pronunciation may be incorrect.",
+        fix: "Add the correct lang attribute to the HTML element.",
+        benefit: "Assistive technologies can better identify the page language."
+    },
+    "Character Encoding": {
+        category: "Compatibility",
+        what: "Checks whether the document declares character encoding.",
+        why: "Encoding helps browsers display letters and symbols correctly.",
+        caution: "Incorrect encoding can cause characters to display incorrectly.",
+        fix: "Declare UTF-8 character encoding.",
+        benefit: "Text can display more consistently."
+    },
+    "XML Sitemap": {
+        category: "SEO & Content",
+        what: "Checks for an XML sitemap at the standard sitemap.xml location.",
+        why: "A sitemap can help search engines discover important pages.",
+        caution: "A missing sitemap at this location does not prove no sitemap exists elsewhere.",
+        fix: "Create a valid sitemap and reference its location appropriately.",
+        benefit: "Search engines may discover pages more efficiently."
+    },
+    "Robots.txt": {
+        category: "SEO & Content",
+        what: "Checks whether robots.txt is available at the website root.",
+        why: "It provides crawling instructions to participating crawlers.",
+        caution: "A missing file is not automatically a security issue.",
+        fix: "Create suitable crawler instructions.",
+        benefit: "Search engines receive clearer crawling guidance."
+    },
+    "Response Compression": {
+        category: "Performance",
+        what: "Checks whether the response includes a content-encoding header.",
+        why: "Compression can reduce the amount of data transferred.",
+        caution: "Uncompressed resources may require more bandwidth.",
+        fix: "Enable suitable compression such as Brotli or Gzip.",
+        benefit: "Reduced transfer sizes can improve performance."
+    },
+    "Cache Control": {
+        category: "Performance",
+        what: "Checks whether the server provides Cache-Control instructions.",
+        why: "Caching allows browsers to reuse resources.",
+        caution: "Poor caching can increase repeat downloads.",
+        fix: "Set suitable cache policies for static assets and changing content.",
+        benefit: "Repeat visits may require fewer downloads."
+    },
+    "Server Information Exposure": {
+        category: "Security",
+        what: "Checks whether the response exposes a Server header.",
+        why: "Server headers can disclose web server software information.",
+        caution: "Unnecessary version information may help attackers identify software.",
+        fix: "Remove unnecessary server version details where possible.",
+        benefit: "Less unnecessary server information is exposed."
+    },
+    "Technology Header Exposure": {
+        category: "Security",
+        what: "Checks whether X-Powered-By reveals backend technology.",
+        why: "Technology headers may disclose implementation details.",
+        caution: "Exposed information may help attackers narrow their research.",
+        fix: "Disable unnecessary X-Powered-By headers.",
+        benefit: "The website reveals less implementation information."
+    },
+    "Cross-Origin Opener Policy": {
+        category: "Security",
+        what: "Checks for the Cross-Origin-Opener-Policy header.",
+        why: "COOP can isolate a browsing context from certain cross-origin documents.",
+        caution: "Some cross-origin isolation protections may be unavailable.",
+        fix: "Review whether a suitable COOP policy fits the application.",
+        benefit: "The website may gain stronger browsing-context isolation."
+    },
+    "Cross-Origin Resource Policy": {
+        category: "Security",
+        what: "Checks for the Cross-Origin-Resource-Policy header.",
+        why: "CORP can control which origins load certain resources.",
+        caution: "Without it, there are fewer explicit cross-origin resource restrictions.",
+        fix: "Configure a suitable CORP policy.",
+        benefit: "Cross-origin resource access can be more deliberately restricted."
+    },
+    "Cross-Origin Embedder Policy": {
+        category: "Security",
+        what: "Checks for the Cross-Origin-Embedder-Policy header.",
+        why: "COEP can restrict loading of cross-origin resources.",
+        caution: "Some cross-origin isolation capabilities may be unavailable.",
+        fix: "Configure COEP after checking required third-party resources.",
+        benefit: "The application may use stronger isolation features."
+    },
+    "External Link Protection": {
+        category: "Security",
+        what: "Checks external links that open a new tab without noopener.",
+        why: "noopener prevents the opened page accessing the original page through window.opener.",
+        caution: "Unprotected links can create tabnabbing risks in some situations.",
+        fix: "Add rel=\"noopener\" to appropriate target blank links.",
+        benefit: "New pages cannot use the opener relationship to control the original tab."
+    },
+    "HTML Page Size": {
+        category: "Performance",
+        what: "Measures the size of the downloaded HTML response.",
+        why: "Large HTML documents can take longer to transfer and process.",
+        caution: "Large responses may contribute to slower delivery.",
+        fix: "Reduce unnecessary markup and oversized embedded content.",
+        benefit: "A smaller document can reduce transfer and processing work."
+    },
+    "Redirect Detection": {
+        category: "Navigation",
+        what: "Checks whether the final URL differs from the original URL.",
+        why: "Redirects send visitors from one address to another.",
+        caution: "Unnecessary redirect chains can add delay.",
+        fix: "Remove unnecessary redirect steps and update old links.",
+        benefit: "Visitors may reach the intended page with fewer steps."
+    },
+    "Canonical HTTPS": {
+        category: "SEO & Security",
+        what: "Checks whether the detected canonical link appears to use HTTPS.",
+        why: "The canonical URL should identify the preferred page version.",
+        caution: "An HTTP canonical reference may send inconsistent URL signals.",
+        fix: "Set the canonical link to the correct HTTPS URL where appropriate.",
+        benefit: "Search engines receive a clearer preferred URL."
+    },
+    "External Script Transport": {
+        category: "Security",
+        what: "Checks whether external scripts use HTTP.",
+        why: "Scripts can execute code in the context of the page.",
+        caution: "An HTTP script on an HTTPS page may be blocked or exposed to tampering.",
+        fix: "Use trusted HTTPS script URLs.",
+        benefit: "Scripts can be requested through secure connections."
+    },
+    "Iframe Sandbox Attribute": {
+        category: "Security",
+        what: "Checks whether detected iframe elements have a sandbox attribute.",
+        why: "Sandbox restrictions can limit embedded content capabilities.",
+        caution: "Unrestricted third-party iframe content may have more permissions than necessary.",
+        fix: "Use an appropriate sandbox configuration and test required features.",
+        benefit: "Embedded content can operate with more limited permissions."
+    }
+};
+
+/* COMMON HELPERS */
+
+function safeText(value) {
+    return value === null || value === undefined || value === ""
+        ? "--"
+        : String(value);
+}
+
+function normalizeStatus(status) {
+    const value = String(status || "Skipped").toLowerCase();
+
+    if (value === "passed" || value === "pass") return "Passed";
+    if (value === "failed" || value === "fail") return "Failed";
+    if (value === "warning" || value === "warn") return "Warning";
+
+    return "Skipped";
+}
+
+function showEmptyDashboard(message) {
+    document.getElementById("targetWebsite").textContent = message;
+
+    resultsTable.innerHTML =
+        `<tr><td colspan="5" class="empty-state">${message}</td></tr>`;
+
+    testList.innerHTML = `
+        <div class="test-empty">
+            <strong>${message}</strong>
+            Run a new scan to see the investigation results.
+        </div>
+    `;
+
+    document.getElementById("reportChoice").style.display = "none";
+}
+
+/* URL RESULTS */
+
+function addResultRow(result) {
+    const row = document.createElement("tr");
+
+    const values = [
+        result.url,
+        safeText(result.statusCode),
+        result.responseTime !== undefined
+            ? result.responseTime + " ms"
+            : "--",
+        result.redirected ? "YES" : "NO",
+        safeText(result.status)
+    ];
+
+    values.forEach((value, index) => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+
+        if (index === 4) {
+            cell.className = "status-cell " +
+                String(result.status || "").toLowerCase();
+        }
+
+        row.appendChild(cell);
+    });
+
+    resultsTable.appendChild(row);
+}
+
+/* TEST DATA */
+
+function normalizeTests(data) {
+    if (Array.isArray(data.tests) && data.tests.length) {
+        return data.tests;
+    }
+
+    if (Array.isArray(data.analysis)) {
+        return data.analysis.flatMap(item =>
+            Array.isArray(item.tests)
+                ? item.tests
+                : item.testResults && Array.isArray(item.testResults.tests)
+                    ? item.testResults.tests
+                    : []
+        );
+    }
+
+    return [];
+}
+
+function getExplanation(test) {
+    const known = explanations[test.name || ""];
+
+    if (known) {
+        return {
+            ...known,
+            category: test.category || known.category
+        };
+    }
+
+    return {
+        category: test.category || "General",
+        what: "This check examines a technical characteristic of the website.",
+        why: "It helps identify potential problems affecting reliability, security, compatibility or performance.",
+        caution: "Review the detailed test result before deciding whether action is necessary.",
+        fix: "Investigate the reported condition and apply an appropriate correction.",
+        benefit: "Addressing a confirmed issue may improve the relevant aspect of the website."
+    };
+}
+
+function renderTests() {
+    const filter = document.getElementById("testFilter").value;
+
+    const filtered = allTests.filter(test =>
+        filter === "all" || test.status === filter
+    );
+
+    testList.replaceChildren();
+
+    if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "test-empty";
+
+        const strong = document.createElement("strong");
+        strong.textContent = "No matching test results.";
+
+        empty.append(strong, document.createTextNode(
+            " Try another filter or run a new scan."
+        ));
+
+        testList.appendChild(empty);
+        return;
+    }
+
+    filtered.forEach((test, index) => {
+        const status = test.status;
+        const explanation = getExplanation(test);
+
+        const item = document.createElement("article");
+        item.className = "test-item";
+
+        const header = document.createElement("button");
+        header.type = "button";
+        header.className = "test-item-header";
+        header.setAttribute("aria-expanded", "false");
+
+        const id = document.createElement("div");
+        id.className = "test-id";
+        id.textContent = "T" + String(index + 1).padStart(2,"0");
+
+        const details = document.createElement("div");
+
+        const name = document.createElement("div");
+        name.className = "test-name";
+        name.textContent = test.name || "Unnamed test";
+
+        const category = document.createElement("div");
+        category.className = "test-category";
+        category.textContent = explanation.category;
+
+        const message = document.createElement("div");
+        message.className = "test-message";
+        message.textContent = test.details || test.message ||
+            "No additional technical details provided.";
+
+        details.append(name, category, message);
+
+        const badge = document.createElement("span");
+        badge.className = "test-status " + status.toLowerCase();
+        badge.textContent = status.toUpperCase();
+
+        const arrow = document.createElement("span");
+        arrow.className = "test-arrow";
+        arrow.textContent = "⌄";
+
+        header.append(id, details, badge, arrow);
+
+        const panel = document.createElement("div");
+        panel.className = "test-explanation";
+
+        const panelTitle = document.createElement("div");
+        panelTitle.className = "explanation-heading";
+        panelTitle.textContent = "UNDERSTANDING THIS TEST";
+
+        const grid = document.createElement("div");
+        grid.className = "explanation-grid";
+
+        const resultMeaning = {
+            Passed: "The scanner completed this check successfully. This is a positive result for the condition examined, but it does not guarantee that the entire website is secure.",
+            Failed: "The scanner detected a failed condition. Investigate the reported details and correct the issue if applicable.",
+            Warning: "The scanner found something that may need attention. Review the details before deciding whether a change is necessary.",
+            Skipped: "This test could not be performed or was not applicable. A skipped result does not mean the website passed this test."
+        };
+
+        const blocks = [
+            ["WHAT IS IT?", explanation.what],
+            ["WHY IS IT USED?", explanation.why],
+            ["WHAT DOES THIS RESULT MEAN?", resultMeaning[status]],
+            ["CAUTION / POSSIBLE CONSEQUENCE", explanation.caution],
+            ["RECOMMENDED ACTION", explanation.fix],
+            ["EXPECTED BENEFIT AFTER FIXING", explanation.benefit],
+            ["ACTUAL SCANNER DETAIL", test.details || test.message || "No additional details were returned."]
+        ];
+
+        blocks.forEach(([heading, content], blockIndex) => {
+            const box = document.createElement("div");
+            box.className = "explanation-box" +
+                (blockIndex === blocks.length - 1 ? " full" : "");
+
+            const h4 = document.createElement("h4");
+            h4.textContent = heading;
+
+            const p = document.createElement("p");
+            p.textContent = content;
+
+            box.append(h4, p);
+            grid.appendChild(box);
+        });
+
+        panel.append(panelTitle, grid);
+
+        header.addEventListener("click", () => {
+            const isOpen = item.classList.toggle("open");
+            header.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        item.append(header, panel);
+        testList.appendChild(item);
+    });
+}
+
+/* ANALYTICS */
+
+function getCategory(name, test) {
+    if (test && test.category) return test.category;
+
+    const explanation = explanations[name];
+    return explanation ? explanation.category : "General";
+}
+
+function destroyCharts() {
+    if (responseChart) responseChart.destroy();
+    if (pieChart) pieChart.destroy();
+    if (barChart) barChart.destroy();
+
+    responseChart = null;
+    pieChart = null;
+    barChart = null;
+}
+
+function showChartMessage(containerId, message) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    const div = document.createElement("div");
+    div.className = "no-chart-data";
+    div.textContent = message;
+
+    container.appendChild(div);
+}
+
+function renderCharts(results) {
+    destroyCharts();
+
+    if (typeof Chart === "undefined") {
+        showChartMessage("lineChartContainer", "Chart library could not load.");
+        showChartMessage("pieChartContainer", "Chart library unavailable.");
+        showChartMessage("barChartContainer", "Chart library unavailable.");
+        return;
+    }
+
+    const passed = allTests.filter(t => t.status === "Passed").length;
+    const failed = allTests.filter(t => t.status === "Failed").length;
+    const warnings = allTests.filter(t => t.status === "Warning").length;
+    const skipped = allTests.filter(t => t.status === "Skipped").length;
+
+    pieChart = new Chart(document.getElementById("testPieChart"), {
+        type: "pie",
+        data: {
+            labels: ["Passed","Failed","Warnings","Skipped"],
+            datasets: [{
+                data: [passed,failed,warnings,skipped],
+                backgroundColor: ["#168044","#dc3545","#e0a12c","#a9adbb"],
+                borderWidth: 2,
+                borderColor: "#ffffff"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        usePointStyle: true,
+                        padding: 17,
+                        font: { family: "DM Mono", size: 10 }
+                    }
+                }
+            }
+        }
+    });
+
+    const issueCounts = {};
+
+    allTests
+        .filter(t => t.status === "Failed" || t.status === "Warning")
+        .forEach(test => {
+            const category = getCategory(test.name,test);
+            issueCounts[category] = (issueCounts[category] || 0) + 1;
+        });
+
+    const categories = Object.keys(issueCounts);
+
+    if (categories.length) {
+        barChart = new Chart(document.getElementById("issueBarChart"), {
+            type: "bar",
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: "Issues",
+                    data: categories.map(category => issueCounts[category]),
+                    backgroundColor: "#293de0",
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: "y",
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    },
+                    y: {
+                        ticks: {
+                            font: { family: "DM Mono", size: 9 }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    } else {
+        showChartMessage("barChartContainer","No failed or warning tests were found.");
+    }
+
+    const validResults = results.filter(result =>
+        Number.isFinite(Number(result.responseTime)) &&
+        result.responseTime !== null &&
+        result.responseTime !== undefined
+    );
+
+    if (validResults.length) {
+        responseChart = new Chart(document.getElementById("responseChart"), {
+            type: "line",
+            data: {
+                labels: validResults.map((result,index) => "URL " + (index + 1)),
+                datasets: [{
+                    label: "Response time (ms)",
+                    data: validResults.map(result => Number(result.responseTime)),
+                    borderColor: "#293de0",
+                    backgroundColor: "rgba(41,61,224,0.12)",
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Milliseconds"
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { family: "DM Mono", size: 10 }
+                        }
+                    }
+                }
+            }
+        });
+
+        document.getElementById("responseChartNote").textContent =
+            validResults.length === 1
+                ? "One actual response-time measurement is available. Historical trends require multiple saved scans."
+                : "Each point represents an actual URL response-time measurement from this scan.";
+
+    } else {
+        showChartMessage("lineChartContainer","No response-time measurements are available.");
+    }
+}
+
+/* EXISTING RECOMMENDATIONS */
+
+function renderRecommendations() {
+    const container = document.getElementById("recommendationList");
+    container.replaceChildren();
+
+    const issues = allTests.filter(test =>
+        test.status === "Failed" || test.status === "Warning"
+    );
+
+    if (!issues.length) {
+        const message = document.createElement("div");
+        message.className = "recommendation-empty";
+        message.textContent =
+            "No failed or warning tests were detected. Continue monitoring the website and review skipped checks where applicable.";
+        container.appendChild(message);
+        return;
+    }
+
+    issues.forEach(test => {
+        const explanation = getExplanation(test);
+
+        const card = document.createElement("article");
+        card.className = "recommendation-card";
+
+        const top = document.createElement("div");
+        top.className = "recommendation-top";
+
+        const heading = document.createElement("h3");
+        heading.textContent = test.name;
+
+        const label = document.createElement("span");
+        label.className = "recommendation-label" +
+            (test.status === "Failed" ? " failed" : "");
+        label.textContent = test.status.toUpperCase();
+
+        top.append(heading,label);
+
+        const action = document.createElement("p");
+        const actionStrong = document.createElement("strong");
+        actionStrong.textContent = "Recommended action: ";
+        action.append(actionStrong,document.createTextNode(explanation.fix));
+
+        const consequence = document.createElement("p");
+        const consequenceStrong = document.createElement("strong");
+        consequenceStrong.textContent = "Possible consequence: ";
+        consequence.append(consequenceStrong,document.createTextNode(explanation.caution));
+
+        const benefit = document.createElement("p");
+        const benefitStrong = document.createElement("strong");
+        benefitStrong.textContent = "Expected benefit: ";
+        benefit.append(benefitStrong,document.createTextNode(explanation.benefit));
+
+        card.append(top,action,consequence,benefit);
+        container.appendChild(card);
+    });
+}
+
+/* TEST SUMMARY */
+
+function updateTestDashboard(data) {
+    allTests = normalizeTests(data).map(test => ({
+        ...test,
+        status: normalizeStatus(test.status)
+    }));
+
+    const total = allTests.length;
+    const passed = allTests.filter(t => t.status === "Passed").length;
+    const failed = allTests.filter(t => t.status === "Failed").length;
+    const warnings = allTests.filter(t => t.status === "Warning").length;
+    const skipped = allTests.filter(t => t.status === "Skipped").length;
+
+    document.getElementById("totalTests").textContent = total;
+    document.getElementById("passedTests").textContent = passed;
+    document.getElementById("failedTests").textContent = failed;
+    document.getElementById("warningTests").textContent = warnings;
+
+    document.getElementById("testCount").textContent = total + " TESTS";
+
+    const passedPercentage = total ? (passed / total) * 100 : 0;
+    const skippedPercentage = total ? (skipped / total) * 100 : 0;
+
+    document.getElementById("testProgress").style.width =
+        passedPercentage + "%";
+
+    document.getElementById("skippedProgress").style.width =
+        skippedPercentage + "%";
+
+    document.getElementById("testPercentage").textContent =
+        Math.round(passedPercentage) + "% PASSED";
+
+    const otherResults = total - passed - skipped;
+
+    document.getElementById("testProgressText").textContent =
+        passed + " passed / " + skipped + " skipped / " +
+        otherResults + " other results / " + total + " total";
+
+    if (!total) {
+        testList.innerHTML = `
+            <div class="test-empty">
+                <strong>No individual test records found.</strong>
+                Run a new scan after checking the backend test results.
+            </div>
+        `;
+    } else {
+        renderTests();
+    }
+
+    renderCharts(data.results || []);
+    renderRecommendations();
+}
+
+/* NEW INTELLIGENCE FUNCTIONS */
+
+function displayFinding(item) {
+    if (typeof item === "string") return item;
+
+    if (!item || typeof item !== "object") {
+        return "No description available.";
+    }
+
+    return item.title ||
+        item.name ||
+        item.details ||
+        item.message ||
+        item.description ||
+        item.test ||
+        "Finding recorded by the scanner.";
+}
+
+function renderFindingList(elementId,items,emptyMessage) {
+    const container = document.getElementById(elementId);
+    container.replaceChildren();
+
+    if (!Array.isArray(items) || !items.length) {
+        const empty = document.createElement("p");
+        empty.className = "intelligence-empty";
+        empty.textContent = emptyMessage;
+        container.appendChild(empty);
+        return;
+    }
+
+    items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "intelligence-item";
+        div.textContent = displayFinding(item);
+        container.appendChild(div);
+    });
+}
+
+function renderWebsiteScore(data) {
+    const scoreElement = document.getElementById("websiteScore");
+    const labelElement = document.getElementById("websiteScoreLabel");
+    const descriptionElement =
+        document.getElementById("websiteScoreDescription");
+
+    const score = Number(data.websiteScore);
+
+    if (!Number.isFinite(score)) {
+        scoreElement.textContent = "--";
+        labelElement.textContent = "SCORE NOT AVAILABLE";
+        descriptionElement.textContent =
+            "This scan does not contain a saved website health score. Run a new scan to generate one.";
+        return;
+    }
+
+    scoreElement.textContent = Math.round(score);
+    labelElement.textContent = safeText(data.scoreLabel).toUpperCase();
+
+    if (score >= 90) {
+        descriptionElement.textContent =
+            "The completed checks indicate a strong result. Continue monitoring the website and review skipped checks.";
+    } else if (score >= 75) {
+        descriptionElement.textContent =
+            "The completed checks indicate a generally good result, with some areas that may need attention.";
+    } else if (score >= 50) {
+        descriptionElement.textContent =
+            "The scan found several areas that may need improvement. Review the issues and recommendations below.";
+    } else {
+        descriptionElement.textContent =
+            "The scan indicates multiple concerns. Review the failed checks and prioritize important corrections.";
+    }
+
+    document.getElementById("scoreBasis").textContent =
+        "BASED ON " + allTests.length + " TEST RECORDS";
+}
+
+function getAggregateFindings(data,field) {
+    if (Array.isArray(data[field])) {
+        return data[field];
+    }
+
+    if (Array.isArray(data.analysis)) {
+        return data.analysis.flatMap(item =>
+            Array.isArray(item[field]) ? item[field] : []
+        );
+    }
+
+    return [];
+}
+
+function renderProsAndCons(data) {
+    renderFindingList(
+        "prosList",
+        getAggregateFindings(data,"pros"),
+        "No positive findings were supplied for this scan. Check the individual test results for passed checks."
+    );
+
+    renderFindingList(
+        "consList",
+        getAggregateFindings(data,"cons"),
+        "No issue descriptions were supplied for this scan. Review failed and warning tests for further details."
+    );
+}
+
+function renderPriorityRecommendations(data) {
+    const container = document.getElementById("priorityRecommendationList");
+    container.replaceChildren();
+
+    let recommendations = getAggregateFindings(data,"recommendations");
+
+    const seen = new Set();
+
+    recommendations = recommendations.filter(item => {
+        const key = displayFinding(item).toLowerCase();
+
+        if (seen.has(key)) return false;
+
+        seen.add(key);
+        return true;
+    });
+
+    if (!recommendations.length) {
+        const empty = document.createElement("div");
+        empty.className = "recommendation-empty";
+        empty.textContent =
+            "No prioritized recommendations were returned for this scan. Review the individual failed and warning tests.";
+        container.appendChild(empty);
+        return;
+    }
+
+    const priorityOrder = { high: 1, medium: 2, low: 3 };
+
+    recommendations.sort((a,b) => {
+        const aPriority = priorityOrder[
+            String(a.priority || "low").toLowerCase()
+        ] || 4;
+
+        const bPriority = priorityOrder[
+            String(b.priority || "low").toLowerCase()
+        ] || 4;
+
+        return aPriority - bPriority;
+    });
+
+    recommendations.forEach(item => {
+        const recommendation =
+            typeof item === "string" ? { title: item } : item;
+
+        const card = document.createElement("article");
+        card.className = "recommendation-card";
+
+        const top = document.createElement("div");
+        top.className = "recommendation-top";
+
+        const heading = document.createElement("h3");
+        heading.textContent =
+            recommendation.title ||
+            recommendation.name ||
+            recommendation.test ||
+            "Website improvement";
+
+        const priority = String(recommendation.priority || "Low");
+
+        const badge = document.createElement("span");
+        badge.className = "priority-label " + priority.toLowerCase();
+        badge.textContent = priority.toUpperCase() + " PRIORITY";
+
+        top.append(heading,badge);
+
+        const description = document.createElement("p");
+        description.textContent =
+            recommendation.description ||
+            recommendation.details ||
+            recommendation.message ||
+            recommendation.recommendation ||
+            "Review this item and verify whether an improvement is required.";
+
+        card.append(top,description);
+
+        if (recommendation.action) {
+            const action = document.createElement("p");
+            action.textContent = "Suggested action: " + recommendation.action;
+            card.appendChild(action);
+        }
+
+        container.appendChild(card);
+    });
+}
+
+function renderLinkCrawl(data) {
+    let summary = data.linkCrawlSummary || {};
+
+    if (
+        !Object.keys(summary).length &&
+        Array.isArray(data.analysis)
+    ) {
+        const summaries = data.analysis
+            .map(item => item.linkCrawlSummary)
+            .filter(Boolean);
+
+        summary = summaries.reduce((total,current) => {
+            [
+                "websitesCrawled",
+                "totalLinksFound",
+                "totalLinksChecked",
+                "internalLinks",
+                "externalLinks",
+                "working",
+                "broken",
+                "unreachable",
+                "redirected",
+                "skipped"
+            ].forEach(key => {
+                total[key] = (Number(total[key]) || 0) +
+                    (Number(current[key]) || 0);
+            });
+
+            total.links.push(
+                ...(Array.isArray(current.links) ? current.links : [])
+            );
+
+            return total;
+        },{links:[]});
+    }
+
+    const fields = {
+        linksFound: summary.totalLinksFound,
+        linksChecked: summary.totalLinksChecked,
+        linksWorking: summary.working,
+        linksBroken: summary.broken,
+        internalLinks: summary.internalLinks,
+        externalLinks: summary.externalLinks,
+        linksRedirected: summary.redirected,
+        linksSkipped:
+            (Number(summary.skipped) || 0) +
+            (Number(summary.unreachable) || 0)
+    };
+
+    Object.entries(fields).forEach(([id,value]) => {
+        document.getElementById(id).textContent = Number(value) || 0;
+    });
+
+    const links = Array.isArray(summary.links) ? summary.links : [];
+
+    document.getElementById("linkScanCount").textContent =
+        links.length + " LINK RECORDS";
+
+    const table = document.getElementById("linkResultsTable");
+    table.replaceChildren();
+
+    if (!links.length) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 5;
+        cell.className = "link-empty";
+        cell.textContent =
+            "No individual link records are available. Link crawling is performed in Deep and CLI scan modes. Older scans may not contain this information.";
+
+        row.appendChild(cell);
+        table.appendChild(row);
+        return;
+    }
+
+    links.forEach(link => {
+        const row = document.createElement("tr");
+
+        const values = [
+            link.url || link.link || link.originalURL || "--",
+            link.type || link.linkType || "--",
+            link.status || "--",
+            link.statusCode ?? link.httpStatus ?? "--",
+            link.finalURL || link.finalUrl || "--"
+        ];
+
+        values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = safeText(value);
+            row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+    });
+}
+
+function renderNewIntelligence(data) {
+    renderWebsiteScore(data);
+    renderProsAndCons(data);
+    renderPriorityRecommendations(data);
+    renderLinkCrawl(data);
+}
+
+/* LOAD DASHBOARD */
+
+function loadDashboard() {
+    const storedData = sessionStorage.getItem("deadLinkScanResult");
+
+    if (!storedData) {
+        showEmptyDashboard(
+            "No scan results found. Please scan a website first."
+        );
+        return;
+    }
+
+    let scan;
+
+    try {
+        scan = JSON.parse(storedData);
+    } catch (error) {
+        showEmptyDashboard("Unable to read scan results.");
+        return;
+    }
+
+    let data = scan.data || scan;
+
+    if (data.data && !Array.isArray(data.results)) {
+        data = data.data;
+    }
+
+    const results = Array.isArray(data.results) ? data.results : [];
+    const firstResult = results[0] || {};
+
+    activeScanId =
+        scan.scanId ||
+        data.scanId ||
+        data._id ||
+        scan._id;
+
+    document.getElementById("targetWebsite").textContent =
+        scan.scannedWebsite ||
+        firstResult.url ||
+        data.url ||
+        "--";
+
+    const mode = String(
+        scan.selectedMode || data.scanMode || "light"
+    ).toLowerCase();
+
+    const modeNames = {
+        light: "LIGHT SCAN",
+        normal: "LIGHT SCAN",
+        full: "DEEP SCAN",
+        deep: "DEEP SCAN",
+        cli: "CLI SCAN"
+    };
+
+    document.getElementById("scanMode").textContent =
+        modeNames[mode] || mode.toUpperCase() + " SCAN";
+
+    document.getElementById("scanId").textContent =
+        activeScanId || "--";
+
+    document.getElementById("scanDate").textContent =
+        "Scan date: " + new Date(
+            scan.scannedAt || data.createdAt || Date.now()
+        ).toLocaleString();
+
+    document.getElementById("finalURL").textContent =
+        firstResult.finalURL || "--";
+
+    document.getElementById("totalURLs").textContent =
+        safeText(data.totalURLs);
+
+    document.getElementById("workingURLs").textContent =
+        safeText(data.working);
+
+    document.getElementById("brokenURLs").textContent =
+        safeText(data.broken);
+
+    document.getElementById("unreachableURLs").textContent =
+        safeText(data.unreachable);
+
+    document.getElementById("responseTime").textContent =
+        safeText(firstResult.responseTime);
+
+    document.getElementById("detailResponseTime").textContent =
+        firstResult.responseTime !== undefined
+            ? firstResult.responseTime + " ms"
+            : "--";
+
+    document.getElementById("httpStatus").textContent =
+        safeText(firstResult.statusCode);
+
+    document.getElementById("httpStatusText").textContent =
+        safeText(firstResult.status);
+
+    document.getElementById("redirectStatus").textContent =
+        firstResult.redirected ? "YES" : "NO";
+
+    document.getElementById("speedStatus").textContent =
+        firstResult.speedStatus ||
+        "Response information received";
+
+    const responseTime = Number(firstResult.responseTime) || 0;
+
+    document.getElementById("performanceBar").style.width =
+        Math.min((responseTime / 3000) * 100,100) + "%";
+
+    document.getElementById("resultsCount").textContent =
+        results.length + " RESULTS";
+
+    resultsTable.replaceChildren();
+
+    if (!results.length) {
+        resultsTable.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty-state">
+                    No URL results available.
+                </td>
+            </tr>
+        `;
+    } else {
+        results.forEach(addResultRow);
+    }
+
+    updateTestDashboard(data);
+    renderNewIntelligence(data);
+
+    if (!activeScanId) {
+        document.getElementById("jsonDownload").disabled = true;
+        document.getElementById("txtDownload").disabled = true;
+
+        showReportMessage("Scan ID unavailable. Please run another scan.");
+    }
+}
+
+/* REPORT DOWNLOAD */
+
+function showReportMessage(message) {
+    document.getElementById("reportMessage").textContent = message;
+}
+
+async function downloadReport(format) {
+    if (!activeScanId) {
+        showReportMessage("Scan ID unavailable.");
+        return;
+    }
+
+    const buttons = [
+        document.getElementById("jsonDownload"),
+        document.getElementById("txtDownload")
+    ];
+
+    buttons.forEach(button => button.disabled = true);
+
+    showReportMessage("Preparing your report...");
+
+    try {
+        const response = await fetch(
+            `${API}/reports/${encodeURIComponent(activeScanId)}/${format}`
+        );
+
+        if (!response.ok) {
+            let message = "Report download failed.";
+
+            try {
+                const error = await response.json();
+                message = error.message || message;
+            } catch (_) {}
+
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const downloadURL = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = downloadURL;
+        link.download = `DeadLinkDetective-${activeScanId}.${format}`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(downloadURL),1000);
+
+        showReportMessage(
+            format.toUpperCase() + " report downloaded successfully!"
+        );
+
+    } catch (error) {
+        showReportMessage(error.message);
+
+    } finally {
+        buttons.forEach(button => button.disabled = false);
+    }
+}
+
+/* EVENTS */
+
+document.getElementById("testFilter").addEventListener(
+    "change",
+    renderTests
+);
+
+document.getElementById("jsonDownload").addEventListener(
+    "click",
+    () => downloadReport("json")
+);
+
+document.getElementById("txtDownload").addEventListener(
+    "click",
+    () => downloadReport("txt")
+);
+
+document.getElementById("skipReport").addEventListener(
+    "click",
+    () => {
+        document.getElementById("reportChoice").style.display = "none";
+    }
+);
+
+/* START DASHBOARD */
+
+loadDashboard();
+</script>
+
+</body>
+</html>
